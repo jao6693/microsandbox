@@ -92,6 +92,10 @@ pub enum MicrosandboxSubcommand {
         #[arg(long = "env", name = "ENV")]
         envs: Vec<String>,
 
+        /// FBE Resource Limits, format: <RESOURCE>=<SOFT>:<HARD>
+        #[arg(long = "rlimit", name = "RLIMIT")]
+        rlimits: Vec<String>,
+
         /// Environment file
         #[arg(long)]
         env_file: Option<Utf8UnixPathBuf>,
@@ -308,6 +312,10 @@ pub enum MicrosandboxSubcommand {
         #[arg(long = "env", name = "ENV")]
         envs: Vec<String>,
 
+        /// FBE Resource limits, format: <RESOURCE>=<SOFT:HARD>
+        #[arg(long = "rlimit", name = "RLIMIT")]
+        rlimits: Vec<String>,
+
         /// Working directory
         #[arg(long)]
         workdir: Option<Utf8UnixPathBuf>,
@@ -359,6 +367,10 @@ pub enum MicrosandboxSubcommand {
         /// Environment variables, format: <key>=<value>
         #[arg(long = "env", name = "ENV")]
         envs: Vec<String>,
+
+        /// FBE Resource limits, format: <RESOURCE>=<SOFT:HARD>
+        #[arg(long = "rlimit", name = "RLIMIT")]
+        rlimits: Vec<String>,
 
         /// Working directory
         #[arg(long)]

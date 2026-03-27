@@ -165,6 +165,10 @@ pub struct SandboxConfig {
     #[serde(default, deserialize_with = "deserialize_null_as_default")]
     pub envs: Vec<String>,
 
+    /// FBE The resource limits to use
+    #[serde(default, deserialize_with = "deserialize_null_as_default")]
+    pub rlimits: Vec<String>,
+
     /// The sandboxes to depend on
     #[serde(default, deserialize_with = "deserialize_null_as_default")]
     pub depends_on: Vec<String>,

@@ -15,6 +15,7 @@ use typed_path::Utf8UnixPathBuf;
 use crate::{
     MicrosandboxError, MicrosandboxResult,
     config::{EnvPair, PathPair, PortPair, ReferenceOrPath},
+    vm::LinuxRlimit, // FBE add LinuxRLimit import
 };
 
 use super::{MicrosandboxBuilder, SandboxBuilder};
@@ -149,6 +150,12 @@ pub struct Build {
     #[serde(skip_serializing_if = "Vec::is_empty", default)]
     #[builder(default)]
     pub(crate) envs: Vec<EnvPair>,
+
+    /// FBE The resource limits to use.
+    /// controls how this field is turned into JSON/YAML (serialization) and back into a Rust struct (deserialization)
+    #[serde(skip_serializing_if = "Vec::is_empty", default)]
+    #[builder(default)]
+    pub(crate) rlimits: Vec<LinuxRlimit>,
 
     /// The builds to depend on.
     #[serde(skip_serializing_if = "Vec::is_empty", default)]

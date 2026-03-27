@@ -7,6 +7,7 @@ use typed_path::Utf8UnixPathBuf;
 use crate::{
     MicrosandboxResult,
     config::{EnvPair, PathPair, PortPair, ReferenceOrPath},
+    vm::LinuxRlimit, // FBE add LinuxRLimit import
 };
 
 use super::{Build, Meta, Microsandbox, Module, NetworkScope, Sandbox};
@@ -44,6 +45,7 @@ pub struct MicrosandboxBuilder {
 /// - `volumes`: The volumes to mount
 /// - `ports`: The ports to expose
 /// - `envs`: The environment variables to use
+/// - `rlimits`: The resource limits to use 
 /// - `env_file`: The environment file to use
 /// - `depends_on`: The sandboxes to depend on
 /// - `workdir`: The working directory to use
@@ -62,6 +64,7 @@ pub struct SandboxBuilder<I> {
     volumes: Vec<PathPair>,
     ports: Vec<PortPair>,
     envs: Vec<EnvPair>,
+    rlimits: Vec<LinuxRLimit>,
     env_file: Option<Utf8UnixPathBuf>,
     depends_on: Vec<String>,
     workdir: Option<Utf8UnixPathBuf>,
@@ -144,6 +147,7 @@ impl<I> SandboxBuilder<I> {
             volumes: self.volumes,
             ports: self.ports,
             envs: self.envs,
+            rlimits: self.rlimits,
             env_file: self.env_file,
             depends_on: self.depends_on,
             workdir: self.workdir,
@@ -183,6 +187,12 @@ impl<I> SandboxBuilder<I> {
     /// Sets the environment variables for the sandbox
     pub fn envs(mut self, envs: impl IntoIterator<Item = EnvPair>) -> SandboxBuilder<I> {
         self.envs = envs.into_iter().collect();
+        self
+    }
+
+    /// FBE Sets the resource limits for the sandbox
+    pub fn envs(mut self, envs: impl IntoIterator<Item = LinuxRLimit>) -> SandboxBuilder<I> {
+        self.rlimits = rlimits.into_iter().collect();
         self
     }
 
@@ -262,6 +272,7 @@ impl SandboxBuilder<ReferenceOrPath> {
             volumes: self.volumes,
             ports: self.ports,
             envs: self.envs,
+            rlimits: self.rlimits,
             depends_on: self.depends_on,
             workdir: self.workdir,
             shell: self.shell,
@@ -289,6 +300,7 @@ impl Default for SandboxBuilder<()> {
             volumes: Vec::new(),
             ports: Vec::new(),
             envs: Vec::new(),
+            rlimits: Vec::new(),
             env_file: None,
             depends_on: Vec::new(),
             workdir: None,

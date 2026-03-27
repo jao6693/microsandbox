@@ -16,6 +16,7 @@ use typed_path::Utf8UnixPathBuf;
 use crate::{
     MicrosandboxError, MicrosandboxResult,
     config::{EnvPair, Microsandbox, PathSegment, PortPair, Sandbox},
+    vm::LinuxRlimit, // FBE add LinuxRLimit import
     oci::Reference,
 };
 
@@ -45,6 +46,9 @@ pub struct SandboxConfig {
 
     /// The environment variables to use.
     pub envs: Vec<String>,
+
+    /// FBE The resource limits to use.
+    pub rlimits: Vec<String>,
 
     /// The environment file to use.
     pub env_file: Option<Utf8UnixPathBuf>,
@@ -208,6 +212,17 @@ pub async fn add(
 
                     for env in &config.envs {
                         envs_sequence.push_string(env);
+                    }
+                }
+
+                // FBE Add resource limits if any
+                if !config.rlimits.is_empty() {
+                    let mut rlimits_sequence = sandbox_mapping
+                        .insert("rlimits", yaml::Separator::Auto)
+                        .make_sequence();
+
+                    for rlimit in &config.rlimits {
+                        rlimits_sequence.push_string(rlimit);
                     }
                 }
 

@@ -27,7 +27,7 @@ use crate::{
     },
     management::{config, db, menv, rootfs},
     oci::{Image, Reference},
-    vm::Rootfs,
+    vm::{Rootfs, LinuxRLimit}, // FBE add LinuxRLimit import
 };
 
 //--------------------------------------------------------------------------------------------------
@@ -274,6 +274,11 @@ pub async fn prepare_run(
         command.arg("--env").arg(env.to_string());
     }
 
+    // FBE Resource Limits
+    for rlimit in sandbox_config.get_rlimits() {
+        command.arg("--rlimit").arg(rlimit.to_string());
+    }
+
     // Ports
     for port in sandbox_config.get_ports() {
         command.arg("--port-map").arg(port.to_string());
@@ -393,6 +398,7 @@ pub async fn prepare_run(
 /// * `volumes` - List of volume mappings in the format "host_path:guest_path"
 /// * `ports` - List of port mappings in the format "host_port:guest_port"
 /// * `envs` - List of environment variables in the format "KEY=VALUE"
+/// * `rlimits` - List of resource limits in the format "RESOURCE=SOFT:HARD"
 /// * `workdir` - Optional working directory path inside the sandbox
 /// * `exec` - Optional command to execute within the sandbox. Overrides `script` if provided.
 /// * `args` - Additional arguments to pass to the specified script or command
@@ -450,6 +456,7 @@ pub async fn run_temp(
     volumes: Vec<String>,
     ports: Vec<String>,
     envs: Vec<String>,
+    rlimits: Vec<String>,
     workdir: Option<Utf8UnixPathBuf>,
     scope: Option<String>,
     exec: Option<&str>,
@@ -467,6 +474,8 @@ pub async fn run_temp(
     let volumes: Vec<PathPair> = volumes.into_iter().filter_map(|v| v.parse().ok()).collect();
     let ports: Vec<PortPair> = ports.into_iter().filter_map(|p| p.parse().ok()).collect();
     let envs: Vec<EnvPair> = envs.into_iter().filter_map(|e| e.parse().ok()).collect();
+    // Parse the resource limits into their respective types
+    let rlimits: Vec<LinuxRLimit> = rlimits.into_iter().filter_map(|r| r.parse().ok()).collect();
 
     // Build the temporary sandbox configuration.
     let sandbox = {
@@ -494,6 +503,10 @@ pub async fn run_temp(
 
         if !envs.is_empty() {
             b = b.envs(envs);
+        }
+
+        if !rlimits.is_empty() {
+            b = b.rlimits(rlimits);
         }
 
         if let Some(scope) = scope {

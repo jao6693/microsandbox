@@ -64,7 +64,7 @@ pub struct SandboxBuilder<I> {
     volumes: Vec<PathPair>,
     ports: Vec<PortPair>,
     envs: Vec<EnvPair>,
-    rlimits: Vec<LinuxRLimit>,
+    rlimits: Vec<LinuxRlimit>,
     env_file: Option<Utf8UnixPathBuf>,
     depends_on: Vec<String>,
     workdir: Option<Utf8UnixPathBuf>,
@@ -191,7 +191,7 @@ impl<I> SandboxBuilder<I> {
     }
 
     /// FBE Sets the resource limits for the sandbox
-    pub fn envs(mut self, envs: impl IntoIterator<Item = LinuxRLimit>) -> SandboxBuilder<I> {
+    pub fn rlimits(mut self, rlimits: impl IntoIterator<Item = LinuxRlimit>) -> SandboxBuilder<I> {
         self.rlimits = rlimits.into_iter().collect();
         self
     }

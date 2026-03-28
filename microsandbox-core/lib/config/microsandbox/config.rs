@@ -265,6 +265,10 @@ pub struct Sandbox {
     #[serde(skip_serializing_if = "Vec::is_empty", default)]
     pub(crate) envs: Vec<EnvPair>,
 
+    /// The resource limits to use.
+    #[serde(skip_serializing_if = "Vec::is_empty", default)]
+    pub(crate) rlimits: Vec<LinuxRlimit>,
+
     /// The sandboxes to depend on.
     #[serde(skip_serializing_if = "Vec::is_empty", default)]
     pub(crate) depends_on: Vec<String>,

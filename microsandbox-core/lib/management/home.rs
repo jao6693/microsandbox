@@ -7,6 +7,7 @@
 use crate::{
     MicrosandboxError, MicrosandboxResult,
     config::{EnvPair, Microsandbox, PathPair, PortPair, ReferenceOrPath, Sandbox},
+    vm::LinuxRlimit, // FBE add import LinuxRlimit
     management::{config, db, menv},
     oci::{Image, Reference},
 };
@@ -120,6 +121,7 @@ pub async fn clean(force: bool) -> MicrosandboxResult<()> {
 /// * `volumes` - List of volume mappings in the format "host_path:guest_path"
 /// * `ports` - List of port mappings in the format "host_port:guest_port"
 /// * `envs` - List of environment variables in the format "KEY=VALUE"
+/// * `rlimits` - List of resource limits in the format "RESOURCE=SOFT:HARD"
 /// * `workdir` - Optional working directory path inside the sandbox
 /// * `scope` - Optional network scope for the sandbox
 /// * `exec` - Optional command to execute within the sandbox
@@ -177,6 +179,7 @@ pub async fn install(
     volumes: Vec<String>,
     ports: Vec<String>,
     envs: Vec<String>,
+    rlimits: Vec<String>,
     workdir: Option<Utf8UnixPathBuf>,
     scope: Option<String>,
     exec: Option<&str>,
@@ -211,6 +214,8 @@ pub async fn install(
     let volumes: Vec<PathPair> = volumes.into_iter().filter_map(|v| v.parse().ok()).collect();
     let ports: Vec<PortPair> = ports.into_iter().filter_map(|p| p.parse().ok()).collect();
     let envs: Vec<EnvPair> = envs.into_iter().filter_map(|e| e.parse().ok()).collect();
+    // Parse the resource limits strings into their respective types
+    let rlimits: Vec<LinuxRlimit> = rlimits.into_iter().filter_map(|r| r.parse().ok()).collect();
 
     // Build the sandbox configuration
     let mut sandbox = {
@@ -238,6 +243,10 @@ pub async fn install(
 
         if !envs.is_empty() {
             b = b.envs(envs);
+        }
+
+        if !rlimits.is_empty() {
+            b = b.rlimits(rlimits);
         }
 
         if let Some(scope) = scope {

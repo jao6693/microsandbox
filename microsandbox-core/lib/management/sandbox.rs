@@ -27,7 +27,7 @@ use crate::{
     },
     management::{config, db, menv, rootfs},
     oci::{Image, Reference},
-    vm::{Rootfs, LinuxRLimit}, // FBE add LinuxRLimit import
+    vm::{Rootfs, LinuxRlimit}, // FBE add LinuxRLimit import
 };
 
 //--------------------------------------------------------------------------------------------------
@@ -475,7 +475,7 @@ pub async fn run_temp(
     let ports: Vec<PortPair> = ports.into_iter().filter_map(|p| p.parse().ok()).collect();
     let envs: Vec<EnvPair> = envs.into_iter().filter_map(|e| e.parse().ok()).collect();
     // Parse the resource limits into their respective types
-    let rlimits: Vec<LinuxRLimit> = rlimits.into_iter().filter_map(|r| r.parse().ok()).collect();
+    let rlimits: Vec<LinuxRlimit> = rlimits.into_iter().filter_map(|r| r.parse().ok()).collect();
 
     // Build the temporary sandbox configuration.
     let sandbox = {
